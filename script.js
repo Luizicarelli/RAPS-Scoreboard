@@ -41,7 +41,7 @@ const houses = [
   },
 ];
 
-fetch('https://house-points-db.herokuapp.com/get')
+fetch('https://house-points.onrender.com/get')
   .then((response) => response.json())
   .then((data) => {
     console.log(data);
