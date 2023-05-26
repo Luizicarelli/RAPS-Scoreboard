@@ -1,62 +1,61 @@
-rubyPoints = document.getElementById('ruby-points');
-sapphirePoints = document.getElementById('sapphire-points');
-amberPoints = document.getElementById('amber-points');
-pearlPoints = document.getElementById('pearl-points');
-winner = document.getElementById('winner');
-startButton = document.getElementById('start-button');
-startButtonContainer = document.getElementById('start-button-container');
+const rubyPoints = document.getElementById('ruby-points');
+const sapphirePoints = document.getElementById('sapphire-points');
+const amberPoints = document.getElementById('amber-points');
+const pearlPoints = document.getElementById('pearl-points');
+const winner = document.getElementById('winner');
+const startButton = document.getElementById('start-button');
+const startButtonContainer = document.getElementById('start-button-container');
+
+import { db } from './db.js';
+import { collection, getDocs } from 'firebase/firestore';
+
+// fetchData();
 
 const houses = [
   {
     houseReference: rubyPoints,
     totalPoints: 0,
-    difference: 0,
-    currentNumber: 0,
-    winner: false,
-    winningMessage: '',
   },
   {
     houseReference: sapphirePoints,
     totalPoints: 0,
-    difference: 0,
-    currentNumber: 0,
-    winner: false,
-    winningMessage: '',
   },
   {
     houseReference: amberPoints,
     totalPoints: 0,
-    difference: 0,
-    currentNumber: 0,
-    winner: false,
-    winningMessage: '',
   },
   {
     houseReference: pearlPoints,
     totalPoints: 0,
-    difference: 0,
-    currentNumber: 0,
-    winner: false,
-    winningMessage: '',
   },
 ];
 
-fetch('https://house-points.onrender.com/get')
-  .then((response) => response.json())
-  .then((data) => {
-    console.log(data);
-    houses[1].totalPoints = +data[1].points;
-    houses[0].totalPoints = +data[0].points;
-    houses[2].totalPoints = +data[3].points;
-    houses[3].totalPoints = +data[2].points;
-
-    houses[1].winningMessage = data[1].message;
-    houses[0].winningMessage = data[0].message;
-    houses[2].winningMessage = data[3].message;
-    houses[3].winningMessage = data[2].message;
-
-    rubyPoints.innerHTML = houses[0].totalPoints;
-    sapphirePoints.innerHTML = houses[1].totalPoints;
-    amberPoints.innerHTML = houses[2].totalPoints;
-    pearlPoints.innerHTML = houses[3].totalPoints;
+async function getData() {
+  const querySnapshot = await getDocs(collection(db, 'points')).catch(
+    (error) => {
+      console.log('Error getting documents: ', error);
+      getData();
+    }
+  );
+  querySnapshot.forEach((doc) => {
+    if (doc.data().house === 'Ruby') {
+      houses[0].totalPoints += parseInt(doc.data().points);
+    }
+    if (doc.data().house === 'Sapphire') {
+      houses[1].totalPoints += parseInt(doc.data().points);
+    }
+    if (doc.data().house === 'Amber') {
+      houses[2].totalPoints += parseInt(doc.data().points);
+    }
+    if (doc.data().house === 'Pearl') {
+      houses[3].totalPoints += parseInt(doc.data().points);
+    }
   });
+}
+
+getData().then(() => {
+  rubyPoints.innerHTML = houses[0].totalPoints;
+  sapphirePoints.innerHTML = houses[1].totalPoints;
+  amberPoints.innerHTML = houses[2].totalPoints;
+  pearlPoints.innerHTML = houses[3].totalPoints;
+});
